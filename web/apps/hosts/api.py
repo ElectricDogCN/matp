@@ -20,12 +20,15 @@ def class2dict(obj):
     # 创建一个空字典
     d = {}
     # 遍历对象的属性字典
-    for k, v in obj.__dict__.items():
-        # 如果属性名不是以双下划线开头和结尾的，就添加到字典中
-        if not k.startswith('_') and not k.endswith('_'):
-            d[k] = v
-    # 返回字典
-    return d
+    try:
+        for k, v in obj.__dict__.items():
+            # 如果属性名不是以双下划线开头和结尾的，就添加到字典中
+            if not k.startswith('_') and not k.endswith('_'):
+                d[k] = v
+        # 返回字典
+        return d
+    except:
+        return None
 
 
 @resources_api.route(f'/{RESOURCE_NAME}', methods=['GET'], strict_slashes=False)
@@ -47,13 +50,10 @@ def get_resources():
 @resources_api.route(f'/{RESOURCE_NAME}/<int:res_id>', methods=['GET'])
 def get_resource(res_id):
     body = RETURN_TEMPLATE.copy()
-    success = res_id
-    if success:
-        data = {
-            'title': 'Hello World',
-            'name': 'Alice',
-            'age': res_id
-        }
+    success = True
+    host = db.session.scalars(db.select(Host).where(Host.id == res_id)).first()
+    if host:
+        data = class2dict(host)
     else:
         data = None
         body.update(code=404)
@@ -77,7 +77,7 @@ def post_resource():
                 activate=activate)
     db.session.add(host)
     db.session.commit()
-    if success:
+    if host:
         data = class2dict(host)
     else:
         data = None
