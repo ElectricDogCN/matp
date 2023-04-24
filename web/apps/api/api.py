@@ -2,7 +2,7 @@ from flask import Blueprint, request, render_template, flash, redirect, url_for,
 from flask_login import login_required, login_user, logout_user, current_user
 
 RESOURCE_NAME = "front"
-resources_api = Blueprint(f'/{RESOURCE_NAME}_api_bp', __name__, url_prefix="/api/private/v1")
+resources_api = Blueprint(f'/{RESOURCE_NAME}_api_bp', __name__, url_prefix="/api/v1")
 
 
 @resources_api.route(f'/login', methods=['POST'], strict_slashes=False)
