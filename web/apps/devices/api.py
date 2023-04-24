@@ -126,7 +126,7 @@ def delete_resource(res_id):
     return body, body["code"]
 
 
-@resources_api.route(f'/{RESOURCE_NAME}/<int:res_id>', methods=['DELETE'])
+@resources_api.route(f'/{RESOURCE_NAME}/instances/<int:res_id>', methods=['GET'])
 def get_devices_instance(res_id):
     body = RETURN_TEMPLATE.copy()
     success = res_id
