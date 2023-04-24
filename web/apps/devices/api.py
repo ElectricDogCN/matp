@@ -132,8 +132,8 @@ def get_devices_instance(res_id):
     success = res_id
 
     if success:
-        data = [{"device_name": "device_name1", "device_info": "1"},
-                {"device_name": "device_name2", "device_info": "2"}]
+        data = [{"device_name": "device_name1", "device_info": "1", "is_root": False},
+                {"device_name": "device_name2", "device_info": "2", "is_root": False}]
     else:
         data = None
         body.update(code=404)
