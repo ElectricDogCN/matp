@@ -124,3 +124,20 @@ def delete_resource(res_id):
         body.update(message="未找到资源")
     body["data"] = data
     return body, body["code"]
+
+
+@resources_api.route(f'/{RESOURCE_NAME}/<int:res_id>', methods=['DELETE'])
+def get_devices_instance(res_id):
+    body = RETURN_TEMPLATE.copy()
+    success = res_id
+
+    if success:
+        data = [{"device_name": "device_name1", "device_info": "1"},
+                {"device_name": "device_name2", "device_info": "2"}]
+    else:
+        data = None
+        body.update(code=404)
+        body.update(status="fail")
+        body.update(message="未找到资源")
+    body["data"] = data
+    return body, body["code"]
