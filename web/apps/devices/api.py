@@ -1,6 +1,8 @@
 # todo 添加host资源的restful api接口
 from flask import Blueprint, request, render_template, flash, redirect, url_for, get_flashed_messages, session, jsonify
 from flask_login import login_required, login_user, logout_user, current_user
+from sqlalchemy import update, delete
+
 from web.apps.devices.models import *
 
 RESOURCE_NAME = "devices"
@@ -60,16 +62,20 @@ def get_resource(res_id):
     return body, body["code"]
 
 
-@resources_api.route(f'/{RESOURCE_NAME}/<int:res_id>', methods=['POST'])
-def post_resource(res_id):
+@resources_api.route(f'/{RESOURCE_NAME}', methods=['POST'])
+def post_resource():
     body = RETURN_TEMPLATE.copy()
-    success = res_id
-    if success:
-        data = {
-            'title': 'Hello World',
-            'name': 'Alice',
-            'age': res_id
-        }
+    success = True
+    device_name = request.form.get('device_name')
+    owner_host = request.form.get('owner_host')
+    status = request.form.get('status')
+    activate = request.form.get('activate')
+
+    device = Device(device_name=device_name, owner_host=owner_host, status=status, activate=activate)
+    db.session.add(device)
+    db.session.commit()
+    if device:
+        data = class2dict(device)
     else:
         data = None
         body.update(code=404)
@@ -83,12 +89,16 @@ def post_resource(res_id):
 def put_resource(res_id):
     body = RETURN_TEMPLATE.copy()
     success = res_id
+    device_name = request.form.get('device_name')
+    owner_host = request.form.get('owner_host')
+    status = request.form.get('status')
+    activate = request.form.get('activate')
+    stmt = update(Device).where(Device.id == res_id).values(device_name=device_name, owner_host=owner_host,
+                                                            status=status, activate=activate)
+    db.session.execute(stmt)
+    db.session.commit()
     if success:
-        data = {
-            'title': 'Hello World',
-            'name': 'Alice',
-            'age': res_id
-        }
+        data = {"id": res_id}
     else:
         data = None
         body.update(code=404)
@@ -102,12 +112,11 @@ def put_resource(res_id):
 def delete_resource(res_id):
     body = RETURN_TEMPLATE.copy()
     success = res_id
+    stmt = delete(Device).where(Device.id == res_id)
+    db.session.execute(stmt)
+    db.session.commit()
     if success:
-        data = {
-            'title': 'Hello World',
-            'name': 'Alice',
-            'age': res_id
-        }
+        data = {"id": res_id}
     else:
         data = None
         body.update(code=404)
