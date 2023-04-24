@@ -67,12 +67,12 @@ def get_resource(res_id):
 def post_resource():
     success = True
     body = RETURN_TEMPLATE.copy()
-    ipaddr = request.form.get('ipaddr')
-    ssh_user = request.form.get('ssh_user')
-    ssh_passwd = request.form.get('ssh_passwd')
-    encoding = request.form.get('encoding')
-    status = bool(request.form.get('status'))
-    activate = bool(request.form.get('activate'))
+    ipaddr = request.get_json().get('ipaddr')
+    ssh_user = request.get_json().get('ssh_user')
+    ssh_passwd = request.get_json().get('ssh_passwd')
+    encoding = request.get_json().get('encoding')
+    status = bool(request.get_json().get('status'))
+    activate = bool(request.get_json().get('activate'))
     host = Host(ipaddr=ipaddr, ssh_user=ssh_user, ssh_passwd=ssh_passwd, encoding=encoding, status=status,
                 activate=activate)
     db.session.add(host)
@@ -92,12 +92,12 @@ def post_resource():
 def put_resource(res_id):
     body = RETURN_TEMPLATE.copy()
     success = True
-    ipaddr = request.form.get('ipaddr')
-    ssh_user = request.form.get('ssh_user')
-    ssh_passwd = request.form.get('ssh_passwd')
-    encoding = request.form.get('encoding')
-    status = bool(request.form.get('status'))
-    activate = bool(request.form.get('activate'))
+    ipaddr = request.get_json().get('ipaddr')
+    ssh_user = request.get_json().get('ssh_user')
+    ssh_passwd = request.get_json().get('ssh_passwd')
+    encoding = request.get_json().get('encoding')
+    status = bool(request.get_json().get('status'))
+    activate = bool(request.get_json().get('activate'))
     stmt = update(Host).where(Host.id == res_id).values(ipaddr=ipaddr, ssh_user=ssh_user, ssh_passwd=ssh_passwd,
                                                         encoding=encoding, status=status,
                                                         activate=activate)
