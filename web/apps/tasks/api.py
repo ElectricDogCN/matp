@@ -133,7 +133,7 @@ def delete_resource(res_id):
 def get_workflows():
     body = RETURN_TEMPLATE.copy()
     success = True
-    workflows = [class2dict(row) for row in db.session.scalars(db.select(Workflow).order_by(Task.create_time)).all()]
+    workflows = [class2dict(row) for row in db.session.scalars(db.select(Workflow).order_by(Workflow.id)).all()]
     if success:
         data = workflows
     else:
@@ -165,9 +165,10 @@ def get_workflow(res_id):
 def post_workflows():
     success = True
     body = RETURN_TEMPLATE.copy()
-    status = request.get_json().get('status')
-    owner_project = request.get_json().get('owner_project')
-    workflows = Workflow(status=status, owner_project=owner_project)
+    index = request.get_json().get('index')
+    script_id = request.get_json().get('script_id')
+    owner_task = request.get_json().get('owner_task')
+    workflows = Workflow(index=index, owner_task=owner_task, script_id=script_id)
     db.session.add(workflows)
     db.session.commit()
     if workflows:
@@ -185,9 +186,10 @@ def post_workflows():
 def put_workflows(res_id):
     body = RETURN_TEMPLATE.copy()
     success = True
-    status = request.get_json().get('status')
-    owner_project = request.get_json().get('owner_project')
-    stmt = update(Workflow).where(Workflow.id == res_id).values(status=status, owner_project=owner_project)
+    index = request.get_json().get('index')
+    script_id = request.get_json().get('script_id')
+    owner_task = request.get_json().get('owner_task')
+    stmt = update(Workflow).where(Workflow.id == res_id).values(index=index, owner_task=owner_task, script_id=script_id)
     db.session.execute(stmt)
     db.session.commit()
     if success:
@@ -223,5 +225,23 @@ def delete_workflows(res_id):
         body.update(code=404)
         body.update(status="fail")
         body.update(message="未找到资源")
+    body["data"] = data
+    return body, body["code"]
+
+
+@resources_api.route(f'/{RESOURCE_NAME}/run/<int:res_id>', methods=['GET'])
+def run(res_id):
+    body = RETURN_TEMPLATE.copy()
+    success = res_id
+    import os
+    f = os.popen(r"C:\Users\asus\.conda\envs\matp_1\python.exe C:\Users\asus\Desktop\test.py")
+    if success:
+        data = f.readlines()
+    else:
+        data = None
+        body.update(code=404)
+        body.update(status="fail")
+        body.update(message="未找到资源")
+    f.close()
     body["data"] = data
     return body, body["code"]

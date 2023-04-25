@@ -1,5 +1,6 @@
 # todo 添加host资源的restful api接口
-from flask import Blueprint, request, render_template, flash, redirect, url_for, get_flashed_messages, session, jsonify
+from flask import Blueprint, request, render_template, flash, redirect, url_for, get_flashed_messages, session, jsonify, \
+    send_file
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy import update, delete
 
@@ -35,7 +36,9 @@ def class2dict(obj):
 def get_resources():
     body = RETURN_TEMPLATE.copy()
     success = True
-    script = [class2dict(row) for row in db.session.scalars(db.select(Script).order_by(Script.create_time)).all()]
+    project_id = request.args.get('query')
+    script = [class2dict(row) for row in db.session.scalars(
+        db.select(Script).where(Script.owner_project == project_id).order_by(Script.create_time)).all()]
     if success:
         data = script
     else:
@@ -91,7 +94,8 @@ def put_resource(res_id):
     script_name = request.get_json().get('script_name')
     owner_project = request.get_json().get('owner_project')
     script_path = request.get_json().get('script_path')
-    stmt = update(Script).where(Script.id == res_id).values(script_name=script_name, owner_project=owner_project, script_path=script_path)
+    stmt = update(Script).where(Script.id == res_id).values(script_name=script_name, owner_project=owner_project,
+                                                            script_path=script_path)
     db.session.execute(stmt)
     db.session.commit()
     if success:
@@ -129,3 +133,27 @@ def delete_resource(res_id):
         body.update(message="未找到资源")
     body["data"] = data
     return body, body["code"]
+
+
+@resources_api.route(f'/{RESOURCE_NAME}/upload', methods=['POST'])
+def upload():
+    file = request.files.get('file')  # 获取上传的文件对象
+    if file:
+        filename = file.filename  # 获取文件名
+        file.save(r'C:\Users\asus\PycharmProjects\github\matp\web\upload\scripts\\' + filename)  # 保存文件到upload目录下
+    body = RETURN_TEMPLATE.copy()
+    success = file
+    if success:
+        data = r'C:\Users\asus\PycharmProjects\github\matp\web\upload\scripts\\' + filename
+    else:
+        data = None
+        body.update(code=404)
+        body.update(status="fail")
+        body.update(message="未找到资源")
+    body["data"] = data
+    return body, body["code"]
+
+
+@resources_api.route(f'/{RESOURCE_NAME}/download/<string:filename>', methods=['GET'])
+def download(filename):
+    return send_file('./upload/scripts/' + filename)

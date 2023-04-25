@@ -48,3 +48,46 @@ def get_resources():
         body.update(message="未找到资源")
     body["data"] = data
     return body, body["code"]
+
+
+@resources_api.route(f'/{RESOURCE_NAME}', methods=['POST'], strict_slashes=False)
+def post_resources():
+    body = RETURN_TEMPLATE.copy()
+    success = True
+    username = request.get_json().get('username')
+    passwd = request.get_json().get('passwd')
+    print(username, passwd)
+    user = User(username, passwd)
+    db.session.add(user)
+    db.session.commit()
+    if success:
+        data = class2dict(user)
+    else:
+        data = None
+        body.update(code=404)
+        body.update(status="fail")
+        body.update(message="未找到资源")
+    body["data"] = data
+    return body, body["code"]
+
+
+@resources_api.route(f'/{RESOURCE_NAME}/<int:res_id>', methods=['DELETE'])
+def delete_resource(res_id):
+    body = RETURN_TEMPLATE.copy()
+    success = res_id
+    stmt = delete(User).where(User.id == res_id)
+    db.session.execute(stmt)
+    db.session.commit()
+    if success:
+        data = {
+            'title': 'Hello World',
+            'name': 'Alice',
+            'age': res_id
+        }
+    else:
+        data = None
+        body.update(code=404)
+        body.update(status="fail")
+        body.update(message="未找到资源")
+    body["data"] = data
+    return body, body["code"]
